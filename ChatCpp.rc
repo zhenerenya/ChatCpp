@@ -153,10 +153,8 @@ CAPTION "About ChatCpp"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           "ChatCpp Version 1.5",IDC_STATIC,40,10,78,8,SS_NOPREFIX
-    LTEXT           "Copyright (C) InterestPrograms.RU",IDC_STATIC,106,39,114,8
+    LTEXT           "ChatCpp Version 1.0",IDC_STATIC,40,10,78,8,SS_NOPREFIX
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,16,WS_GROUP
-    CONTROL         "<a>www.interestprograms.ru</a>",IDC_SYSLINK1,"SysLink",WS_TABSTOP,41,24,83,11
 END
 
 
@@ -177,6 +175,17 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_ABOUTBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -215,17 +224,6 @@ BEGIN
     BEGIN
         VALUE "Translation", 0x409, 1252
     END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// AFX_DIALOG_LAYOUT
-//
-
-IDD_ABOUTBOX AFX_DIALOG_LAYOUT
-BEGIN
-    0
 END
 
 

@@ -48,7 +48,6 @@ struct SENDBUFFER
 		typemessage = 0; 
 		countpeople = 0;
 		stopchat = false;
-		encrypt = true;
 		ZeroMemory(name, sizeof(TCHAR)*14); 
 		ZeroMemory(buffer, sizeof(TCHAR)*202);
 	}
@@ -56,7 +55,6 @@ struct SENDBUFFER
 	int typemessage;
 	int countpeople;
 	bool stopchat;
-	bool encrypt;
 	TCHAR name[14];
 	TCHAR buffer[202];
 };
