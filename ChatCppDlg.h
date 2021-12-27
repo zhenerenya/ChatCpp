@@ -9,34 +9,30 @@
 #include "map"
 
 typedef struct {
-    TCHAR p;
-    TCHAR q;
+	uint64_t p;
+	uint64_t q;
 }key;
 
-TCHAR prost[100] = {
-    17, 19, 23, 29, 31, 37, 41, 43, 47, 53,
-    59, 61, 67, 71, 73, 79, 83, 89, 97, 101,
-    103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
-    157, 163, 167, 173, 179, 181, 191, 193, 197, 199,
-    211, 223, 227, 229, 233, 239, 241, 251, 257, 263,
-    269, 271, 277, 281, 283, 293, 307, 311, 313, 317,
-    331, 337, 347, 349, 353, 359, 367, 373, 379, 383,
-    389, 397, 401, 409, 419, 421, 431, 433, 439, 443,
-    449, 457, 461, 463, 467, 479, 487, 491, 499, 503,
-    509, 521, 523, 541, 547, 557, 563, 569, 571, 577
+
+static uint64_t prost[40] = {
+	5, 7, 11, 13, 17, 19, 23, 29, 31, 37,
+	41, 43, 47, 53, 59, 61, 67, 71, 73, 79,
+	83, 89, 97, 101, 103, 107, 109, 113, 127, 131,
+	137, 139, 149, 151, 157, 163, 167, 173, 179, 181
 };
 
-std::map<CString, key>keys;
+
+static std::map<CString, key>keys;
 
 void GenerateKeys(const CString& s);
 //Расширенный алгоритм Евклида
-TCHAR gcdex(TCHAR a, TCHAR b, TCHAR& x, TCHAR& y);
-TCHAR sqr(TCHAR x);
+uint64_t gcdex(uint64_t a, uint64_t b, uint64_t& x, uint64_t& y);
+uint64_t sqr(uint64_t x);
 //Быстрое возведение в степень
-TCHAR binpow(TCHAR a, TCHAR e, TCHAR mod);
+uint64_t binpow(uint64_t a, uint64_t e, uint64_t mod);
 CString Encrypt(const CString& s, const CString& port);
 //Обратное по модулю
-TCHAR invmod(TCHAR a, TCHAR m);
+uint64_t invmod(uint64_t a, uint64_t m);
 CString Decrypt(const CString& s, const CString& port);
 
 

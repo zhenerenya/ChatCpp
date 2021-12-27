@@ -205,6 +205,7 @@ void CChatCppDlg::OnBnClickedRadioServer()
 			SetWindowText("Сервер ждет подключения!");
 			// В чате только сервер.
 			m_wndCountPeople.SetWindowText("В чате 1 чел.");
+
 			CString s;
 			m_wndPort.GetWindowText(s);
 			GenerateKeys(s);
@@ -373,9 +374,12 @@ void CChatCppDlg::OnBnClickedButtonSend()
 {
 	CString strChat;
 	m_wndSend.GetWindowText(strChat);
-	SendToChat(strChat);
 
+	SendToChat(strChat);
+	
 }
+
+
 
 // Извлечение сообщений из сети чата.
 void CChatCppDlg::OnReceive(void)
@@ -432,6 +436,7 @@ void CChatCppDlg::OnReceive(void)
 		{
 			CString strChat;
 			m_wndChat.GetWindowText(strChat);
+
 			strChat += "    " + CString(sb.name) + ": " + CString(sb.buffer) + "\r\n";
 			m_wndChat.SetWindowText(strChat);
 			int number_line = m_wndChat.GetLineCount();
@@ -479,13 +484,9 @@ void CChatCppDlg::OnClose()
 // Послать строку-сообщение в чат.
 void CChatCppDlg::SendToChat(CString strMessage)
 {
-	CString port;
-	m_wndPort.GetWindowText(port);
 	SENDBUFFER sb;
-	int len = strMessage.GetLength();
-	//шифрование
-	CString s = Encrypt(strMessage, port);
-	memcpy(sb.buffer, s.GetBuffer(), sizeof(TCHAR)*len);
+	size_t len = strMessage.GetLength();
+	memcpy(sb.buffer, strMessage.GetBuffer(), sizeof(TCHAR)*len);
 
 	m_wndName.GetWindowText(strMessage);
 	len = strMessage.GetLength();
@@ -505,10 +506,6 @@ void CChatCppDlg::SendBuffer(SENDBUFFER sb, bool toserver)
 	{
 		for(int i = 0; i < (int)m_vecSockets.size(); i++)
 		{
-			CString s = sb.buffer;
-			CString p;
-			m_wndPort.GetWindowText(p);
-			s = Decrypt(s, p);
 			int send = m_vecSockets[i]->Send(&sb, sizeof(SENDBUFFER));
 			if(send == sizeof(SENDBUFFER))
 			{
@@ -526,6 +523,7 @@ void CChatCppDlg::SendBuffer(SENDBUFFER sb, bool toserver)
 			{
 				CString strChat;
 				m_wndChat.GetWindowText(strChat);
+
 				strChat += "    " + CString(sb.name) + ": " + CString(sb.buffer)  + "\r\n";
 				m_wndChat.SetWindowText(strChat);
 				int number_line = m_wndChat.GetLineCount();
@@ -618,50 +616,50 @@ bool CChatCppDlg::QueryName(void)
 
 void GenerateKeys(const CString& s) {
 	srand(time(NULL));
-	size_t i1 = rand() % 100;
-	size_t i2 = rand() % 100;
+	size_t i1 = rand() % 40;
+	size_t i2 = rand() % 40;
 	keys[s] = { prost[i1], prost[i2] };
 }
 
 //Расширенный алгоритм Евклида
-TCHAR gcdex(TCHAR a, TCHAR b, TCHAR& x, TCHAR& y) {
+uint64_t gcdex(uint64_t a, uint64_t b, uint64_t& x, uint64_t& y) {
 	if (a == 0) {
 		x = 0;
 		y = 1;
 		return b;
 	}
-	TCHAR x1, y1;
-	TCHAR d = gcdex(b % a, a, x1, y1);
+	uint64_t x1, y1;
+	uint64_t d = gcdex(b % a, a, x1, y1);
 	x = y1 - (b / a) * x1;
 	y = x1;
 	return d;
 }
 
-TCHAR sqr(TCHAR x) {
+uint64_t sqr(uint64_t x) {
 	return x * x;
 }
 
 //Быстрое возведение в степень
-TCHAR binpow(TCHAR a, TCHAR e, TCHAR mod) {
+uint64_t binpow(uint64_t a, uint64_t e, uint64_t mod) {
 	return e == 0 ? 1 : (e & 1U ? a * binpow(a, e - 1, mod) % mod : sqr(binpow(a, e / 2, mod)) % mod);
 }
 
 
 
 CString Encrypt(const CString& s, const CString& port) {
-	TCHAR p = keys[port].p;
-	TCHAR q = keys[port].q;
-	TCHAR n = p * q;
-	TCHAR e = 65537;
+	uint64_t p = keys[port].p;
+	uint64_t q = keys[port].q;
+	uint64_t n = p * q;
+	uint64_t e = 619;
 	size_t len = s.GetLength();
-	std::vector<TCHAR> bytes(len);
+	std::vector<uint64_t> bytes(len);
 	for (int i = 0; i < len; i++) {
-		bytes[i] = binpow(s[i], e, n);
+		bytes[i] = binpow((uint64_t)s[i], e, n);
 	}
 
 	TCHAR encrypt[202];
 	for (int i = 0; i < len; i++) {
-		encrypt[i] = bytes[i];
+		encrypt[i] = (TCHAR)bytes[i];
 	}
 	for (int i = len; i < 202; i++) {
 		encrypt[i] = '\0';
@@ -671,28 +669,31 @@ CString Encrypt(const CString& s, const CString& port) {
 }
 
 //Обратное по модулю
-TCHAR invmod(TCHAR a, TCHAR m) {
-	TCHAR x, y;
+uint64_t invmod(uint64_t a, uint64_t m) {
+	uint64_t x, y;
 	gcdex(a, m, x, y);
 	x = (x % m + m) % m;
 	return x;
 }
 
 CString Decrypt(const CString& s, const CString& port) {
-	TCHAR p = keys[port].p;
-	TCHAR q = keys[port].q;
-	TCHAR n = p * q;
-	TCHAR e = 65537;
-	TCHAR fi = (p - 1) * (q - 1);
-	TCHAR d = invmod(e, fi);
+	uint64_t p = keys[port].p;
+	uint64_t q = keys[port].q;
+	uint64_t n = p * q;
+	uint64_t e = 619;
+	uint64_t fi = (p - 1) * (q - 1);
+	uint64_t d = invmod(e, fi);
 	size_t len = s.GetLength();
-	std::vector<TCHAR> bytes(len);
+	std::vector<uint64_t> bytes(len);
 	for (int i = 0; i < len; i++) {
-		bytes[i] = binpow(s[i], d, n);
+		bytes[i] = binpow((uint64_t)s[i], d, n);
 	}
 	TCHAR encrypt[202];
 	for (int i = 0; i < len; i++) {
 		encrypt[i] = (TCHAR)bytes[i];
+	}
+	for (int i = len; i < 202; i++) {
+		encrypt[i] = '\0';
 	}
 	CString str = encrypt;
 	return str;
